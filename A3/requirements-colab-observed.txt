@@ -1,0 +1,8 @@
+# Observed direct dependencies in the successful Colab pilot.
+# This is a subset, not a full environment lock; full pip freeze is in Colab.
+tensorflow==2.21.0
+keras==3.13.2
+numpy==2.4.6
+six==1.17.0
+fire==0.7.1
+absl-py==2.0.0
