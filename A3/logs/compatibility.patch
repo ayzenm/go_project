@@ -1,0 +1,163 @@
+--- a/mnist_fc/constants.py
++++ b/mnist_fc/constants.py
+@@ -22,13 +22,14 @@
+ import os
+ from lottery_ticket.foundations import paths
+ from lottery_ticket.mnist_fc import locations
+-import tensorflow as tf
++import tensorflow.compat.v1 as tf
++tf.disable_v2_behavior()
+ 
+ HYPERPARAMETERS = {'layers': [(300, tf.nn.relu), (100, tf.nn.relu), (10, None)]}
+ 
+ MNIST_LOCATION = locations.MNIST_LOCATION
+ 
+-FASHIONMNIST_LOCATION = locations.FASHIONMNIST_LOCATION
++FASHIONMNIST_LOCATION = 'data/fashionmnist'
+ 
+ OPTIMIZER_FN = functools.partial(tf.train.GradientDescentOptimizer, .1)
+ 
+--- a/mnist_fc/train.py
++++ b/mnist_fc/train.py
+@@ -27,7 +27,8 @@
+ from lottery_ticket.foundations import trainer
+ from lottery_ticket.foundations import union
+ from lottery_ticket.mnist_fc import constants
+-import tensorflow as tf
++import tensorflow.compat.v1 as tf
++tf.disable_v2_behavior()
+ 
+ 
+ def train(output_dir,
+--- a/foundations/model_fc.py
++++ b/foundations/model_fc.py
+@@ -19,7 +19,8 @@
+ from __future__ import print_function
+ 
+ from lottery_ticket.foundations import model_base
+-import tensorflow as tf
++import tensorflow.compat.v1 as tf
++tf.disable_v2_behavior()
+ 
+ 
+ class ModelFc(model_base.ModelBase):
+@@ -55,8 +56,7 @@
+           current_layer,
+           units,
+           activation,
+-          kernel_initializer=tf.contrib.layers.xavier_initializer(
+-              uniform=False))
++          kernel_initializer=tf.glorot_normal_initializer())
+ 
+     # Compute the loss and accuracy.
+     self.create_loss_and_accuracy(label_placeholder, current_layer)
+--- a/foundations/dataset_base.py
++++ b/foundations/dataset_base.py
+@@ -14,7 +14,8 @@
+ 
+ """A base class for managing datasets."""
+ 
+-import tensorflow as tf
++import tensorflow.compat.v1 as tf
++tf.disable_v2_behavior()
+ 
+ 
+ class DatasetSplit(object):
+@@ -36,7 +37,7 @@
+     self._dataset = self._dataset.batch(batch_size)
+ 
+     # Create an iterator for the dataset.
+-    self._iterator = self._dataset.make_initializable_iterator()
++    self._iterator = tf.data.make_initializable_iterator(self._dataset)
+     self._initializer = self._iterator.initializer
+ 
+   @property
+@@ -72,8 +73,8 @@
+     # Create the overall iterator.
+     self._handle = tf.placeholder(tf.string, shape=[])
+     iterator = tf.data.Iterator.from_string_handle(
+-        self._handle, self._train.dataset.output_types,
+-        self._train.dataset.output_shapes)
++        self._handle, tf.data.get_output_types(self._train.dataset),
++        tf.data.get_output_shapes(self._train.dataset))
+     self._placeholders = iterator.get_next()
+ 
+   @property
+--- a/foundations/save_restore.py
++++ b/foundations/save_restore.py
+@@ -24,7 +24,8 @@
+ from lottery_ticket.foundations import paths
+ import numpy as np
+ import six
+-import tensorflow as tf
++import tensorflow.compat.v1 as tf
++tf.disable_v2_behavior()
+ 
+ 
+ def save_network(filename, weights_dict):
+@@ -50,7 +51,7 @@
+   tf.gfile.MakeDirs(filename)
+ 
+   for k, v in weights_dict.items():
+-    with tf.gfile.FastGFile(os.path.join(filename, k + '.npy'), 'w') as fp:
++    with tf.gfile.FastGFile(os.path.join(filename, k + '.npy'), 'wb') as fp:
+       np.save(fp, v)
+ 
+ 
+@@ -82,7 +83,7 @@
+ 
+   for basename in tf.gfile.ListDirectory(filename):
+     name = basename.split('.')[0]
+-    with tf.gfile.FastGFile(os.path.join(filename, basename)) as fp:
++    with tf.gfile.FastGFile(os.path.join(filename, basename), 'rb') as fp:
+       weights_dict[name] = np.load(fp)
+ 
+   return weights_dict
+--- a/foundations/model_base.py
++++ b/foundations/model_base.py
+@@ -22,7 +22,8 @@
+ from __future__ import division
+ from __future__ import print_function
+ 
+-import tensorflow as tf
++import tensorflow.compat.v1 as tf
++tf.disable_v2_behavior()
+ 
+ 
+ class ModelBase(object):
+--- a/foundations/experiment.py
++++ b/foundations/experiment.py
+@@ -19,7 +19,8 @@
+ from __future__ import print_function
+ 
+ import numpy as np
+-import tensorflow as tf
++import tensorflow.compat.v1 as tf
++tf.disable_v2_behavior()
+ 
+ 
+ def experiment(make_dataset, make_model, train_model, prune_masks, iterations,
+--- a/foundations/trainer.py
++++ b/foundations/trainer.py
+@@ -16,7 +16,8 @@
+ 
+ from lottery_ticket.foundations import paths
+ from lottery_ticket.foundations import save_restore
+-import tensorflow as tf
++import tensorflow.compat.v1 as tf
++tf.disable_v2_behavior()
+ 
+ 
+ def train(sess, dataset, model, optimizer_fn, training_len, output_dir,
+--- a/foundations/pruning_test.py
++++ b/foundations/pruning_test.py
+@@ -20,7 +20,8 @@
+ 
+ from lottery_ticket.foundations import pruning
+ import numpy as np
+-import tensorflow as tf
++import tensorflow.compat.v1 as tf
++tf.disable_v2_behavior()
+ 
+ 
+ class PruningTest(tf.test.TestCase):

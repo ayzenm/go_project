@@ -1,0 +1,20 @@
+{
+  "status": "completed",
+  "exit_code": 0,
+  "pilot_start_utc": "2026-11-07T22:38:47.871768+00:00",
+  "training_seconds": 164.00720671099998,
+  "optimizer": "SGD",
+  "learning_rate": 0.1,
+  "batch_size": 64,
+  "pruning_iterations": 0,
+  "train_examples": 60000,
+  "validation_examples": 0,
+  "test_examples": 10000,
+  "logged_final_iteration": 50000,
+  "actual_train_log_rows": 49947,
+  "final_test_loss": 0.07163893431425095,
+  "final_test_accuracy": 0.9796000123023987,
+  "seed_note": "train_order_seed=0; graph reset means TF initialization seed not guaranteed",
+  "scope": "dense pilot only, not Figure 4a reproduction",
+  "provenance": "Transcribed from Colab cell 7 output; full raw files remain in Colab /content/A3_evidence_complete.zip"
+}
